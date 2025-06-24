@@ -2,6 +2,8 @@ import React from 'react';
 import { useGetCategoriesQuery, useDeleteCategoryMutation } from "../../services/apiCategory.ts";
 import { useNavigate } from "react-router-dom";
 
+const BACKEND_URL = "http://127.0.0.1:4096"; // Замінити на твій актуальний бекенд URL
+
 const HomePage: React.FC = () => {
     const { data: list, isLoading, error, refetch } = useGetCategoriesQuery();
     const [deleteCategory] = useDeleteCategoryMutation();
@@ -24,51 +26,49 @@ const HomePage: React.FC = () => {
         navigate(`/edit-category/${id}`);
     };
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Something went wrong.</div>;
+    if (isLoading) return <div>Завантаження...</div>;
+    if (error) return <div>Щось пішло не так.</div>;
 
     return (
-        <div className="relative min-h-screen">
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-100">
-                    <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Слаг</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Опис</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Дії</th>
-                    </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                    {list?.map((item) => (
-                        <tr key={item.id}>
-                            <td className="px-6 py-4 text-sm">{item.id}</td>
-                            <td className="px-6 py-4 text-sm">{item.name}</td>
-                            <td className="px-6 py-4 text-sm">{item.slug}</td>
-                            <td className="px-6 py-4 text-sm">{item.description}</td>
-                            <td className="px-6 py-4 text-right text-sm space-x-2">
-                                <button
-                                    onClick={() => handleEdit(item.id)}
-                                    className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
-                                    aria-label={`Редагувати категорію ${item.name}`}
-                                    title="Редагувати категорію"
-                                >
-                                    Редагувати
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
-                                    className="text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
-                                    aria-label={`Видалити категорію ${item.name}`}
-                                    title="Видалити категорію"
-                                >
-                                    Видалити
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+        <div className="relative min-h-screen p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {list?.map((item) => (
+                    <div
+                        key={item.id}
+                        className="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between"
+                    >
+                        <div>
+                            {item.image && (
+                                <img
+                                    src={item.image.startsWith("http") ? item.image : `${BACKEND_URL}${item.image}`}
+                                    alt={item.name}
+                                    className="w-full h-40 object-cover rounded-md mb-4"
+                                />
+                            )}
+                            <h3 className="text-lg font-semibold mb-2">{item.name}</h3>
+                            <p className="text-sm text-gray-600 mb-1"><strong>Слаг:</strong> {item.slug}</p>
+                            <p className="text-sm text-gray-700">{item.description}</p>
+                        </div>
+                        <div className="mt-4 flex justify-end space-x-3">
+                            <button
+                                onClick={() => handleEdit(item.id)}
+                                className="text-indigo-600 hover:text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                                aria-label={`Редагувати категорію ${item.name}`}
+                                title="Редагувати категорію"
+                            >
+                                Редагувати
+                            </button>
+                            <button
+                                onClick={() => handleDelete(item.id)}
+                                className="text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+                                aria-label={`Видалити категорію ${item.name}`}
+                                title="Видалити категорію"
+                            >
+                                Видалити
+                            </button>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             <button

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Form, Input, Button, message, Card, Typography, Space } from 'antd';
+import React, { useState } from 'react';
+import { Form, Input, Button, message, Card, Typography, Space, Upload } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
+import { UploadOutlined } from '@ant-design/icons';
 import { useCreateCategoryMutation } from '../../services/apiCategory';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -26,15 +27,34 @@ const AddCategoryPage: React.FC = () => {
     const [createCategory, { isLoading }] = useCreateCategoryMutation();
     const navigate = useNavigate();
 
+    // Типізуємо fileList як масив UploadFile
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+
     const onFinish = async (values: IFormValues) => {
         try {
-            await createCategory(values).unwrap();
+            const formData = new FormData();
+            formData.append('name', values.name);
+            formData.append('slug', values.slug);
+            if (values.description) formData.append('description', values.description);
+
+            if (fileList.length > 0) {
+                formData.append('image', fileList[0].originFileObj as Blob);
+            }
+
+            await createCategory(formData).unwrap();
             message.success('Категорію додано успішно!');
             form.resetFields();
+            setFileList([]);
+            navigate(-1);
         } catch (error) {
             console.error(error);
             message.error('Помилка при додаванні категорії');
         }
+    };
+
+    // Типізуємо параметр як об'єкт з fileList масиву UploadFile
+    const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
+        setFileList(fileList);
     };
 
     return (
@@ -43,10 +63,11 @@ const AddCategoryPage: React.FC = () => {
                 <Button
                     onClick={() => navigate(-1)}
                     type="default"
-                    icon={<ArrowLeftOutlined />}
                     style={{ width: 80 }}
                     aria-label="Назад"
-                />
+                >
+                    Назад
+                </Button>
 
                 <Title level={3} style={{ textAlign: 'center', marginBottom: 24 }}>
                     Додавання категорії
@@ -77,6 +98,18 @@ const AddCategoryPage: React.FC = () => {
 
                     <Form.Item label="Опис" name="description">
                         <Input.TextArea rows={4} />
+                    </Form.Item>
+
+                    <Form.Item label="Фото" valuePropName="fileList" getValueFromEvent={e => e && e.fileList}>
+                        <Upload
+                            beforeUpload={() => false} // щоб не завантажувати автоматично
+                            onChange={handleUploadChange}
+                            fileList={fileList}
+                            maxCount={1}
+                            accept="image/*"
+                        >
+                            <Button icon={<UploadOutlined />}>Обрати фото</Button>
+                        </Upload>
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>

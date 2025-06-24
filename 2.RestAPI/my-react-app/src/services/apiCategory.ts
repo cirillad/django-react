@@ -1,9 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { ICategoryItem, ICategoryCreate } from './types';
+import type { ICategoryItem } from './types';
 
 export const apiCategory = createApi({
    reducerPath: 'api',
-   baseQuery: fetchBaseQuery({ baseUrl: 'http://127.0.0.1:4096/api/' }),
+   baseQuery: fetchBaseQuery({
+      baseUrl: 'http://127.0.0.1:4096/api/',
+   }),
    tagTypes: ['Categories'],
    endpoints: (builder) => ({
       getCategories: builder.query<ICategoryItem[], void>({
@@ -21,22 +23,22 @@ export const apiCategory = createApi({
          }),
          invalidatesTags: ['Categories'],
       }),
-      createCategory: builder.mutation<ICategoryItem, ICategoryCreate>({
-         query: (newCategory) => ({
+      createCategory: builder.mutation<ICategoryItem, FormData>({
+         query: (formData) => ({
             url: 'categories/',
             method: 'POST',
-            body: newCategory,
+            body: formData,
          }),
          invalidatesTags: ['Categories'],
       }),
       updateCategory: builder.mutation<
           ICategoryItem,
-          { id: number; name: string; slug: string; description?: string }
+          { id: number; formData: FormData }
       >({
-         query: ({ id, ...patch }) => ({
+         query: ({ id, formData }) => ({
             url: `categories/${id}/`,
             method: 'PUT',
-            body: patch,
+            body: formData,
          }),
          invalidatesTags: ['Categories'],
       }),
