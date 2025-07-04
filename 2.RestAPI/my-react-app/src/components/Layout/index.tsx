@@ -1,6 +1,10 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import {Outlet} from "react-router-dom";
+import {useAppDispatch, useAppSelector} from "../../store";
+import {logout} from "../../store/authSlice.ts";
+
+const BASE_URL = 'http://127.0.0.1:4096';
 
 const user = {
     name: 'Tom Cook',
@@ -18,24 +22,30 @@ const navigation = [
 const userNavigation = [
     { name: 'Your Profile', href: '#' },
     { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
 ]
+
 //@ts-ignore
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-const Layout : React.FC = () => {
+const Layout: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const authUser = useAppSelector(state => state.auth.user);
+
+    const handleLogout = () => {
+        dispatch(logout());
+    };
 
     return (
         <>
             {/*
         This example requires updating your template:
 
-        ```
-        <html class="h-full bg-gray-100">
+
+<html class="h-full bg-gray-100">
         <body class="h-full">
-        ```
+
       */}
             <div className="min-h-full">
                 <Disclosure as="nav" className="bg-gray-800">
@@ -79,30 +89,81 @@ const Layout : React.FC = () => {
                                     </button>
 
                                     {/* Profile dropdown */}
-                                    <Menu as="div" className="relative ml-3">
-                                        <div>
-                                            <MenuButton className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
-                                                <span className="absolute -inset-1.5" />
-                                                <span className="sr-only">Open user menu</span>
-                                                <img alt="" src={user.imageUrl} className="size-8 rounded-full" />
-                                            </MenuButton>
-                                        </div>
-                                        <MenuItems
-                                            transition
-                                            className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                                        >
-                                            {userNavigation.map((item) => (
-                                                <MenuItem key={item.name}>
-                                                    <a
-                                                        href={item.href}
-                                                        className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
-                                                    >
-                                                        {item.name}
-                                                    </a>
+                                    {authUser ? (
+                                        // показуємо аватарку залогіненого користувача
+                                        <Menu as="div" className="relative ml-3">
+                                            <div>
+                                                <MenuButton className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
+                                                    <span className="absolute -inset-1.5" />
+                                                    <span className="sr-only">Open user menu</span>
+                                                    <img
+                                                        src={
+                                                            authUser?.google_picture_url
+                                                                ? authUser.google_picture_url.startsWith('http')
+                                                                    ? authUser.google_picture_url
+                                                                    : `${BASE_URL}${authUser.google_picture_url}`
+                                                                : 'https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500'
+                                                        }
+                                                        alt="User avatar"
+                                                        className="h-8 w-8 rounded-full object-cover"
+                                                    />
+
+                                                </MenuButton>
+                                            </div>
+
+                                            <MenuItems
+                                                className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md
+               bg-white py-1 shadow-lg ring-1 ring-black/5
+               focus:outline-none"
+                                            >
+                                                {userNavigation.map((item) => (
+                                                    <MenuItem key={item.name}>
+                                                        {({ active }) => (
+                                                            <a
+                                                                href={item.href}
+                                                                className={`block px-4 py-2 text-sm text-gray-700 ${
+                                                                    active ? 'bg-gray-100' : ''
+                                                                }`}
+                                                            >
+                                                                {item.name}
+                                                            </a>
+                                                        )}
+                                                    </MenuItem>
+                                                ))}
+
+                                                <MenuItem>
+                                                    {({ active }) => (
+                                                        <button
+                                                            onClick={handleLogout}
+                                                            className={`block w-full px-4 py-2 text-left text-sm text-gray-700 ${
+                                                                active ? 'bg-gray-100' : ''
+                                                            }`}
+                                                        >
+                                                            Sign out
+                                                        </button>
+                                                    )}
                                                 </MenuItem>
-                                            ))}
-                                        </MenuItems>
-                                    </Menu>
+                                            </MenuItems>
+                                        </Menu>
+
+                                    ) : (
+                                        // якщо НЕ залогінений — показати кнопки Login та Register
+                                        <div className="flex space-x-4">
+                                            <a
+                                                href="/login"
+                                                className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                            >
+                                                Login
+                                            </a>
+                                            <a
+                                                href="/register"
+                                                className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-200"
+                                            >
+                                                Register
+                                            </a>
+                                        </div>
+                                    )}
+
                                 </div>
                             </div>
                             <div className="-mr-2 flex md:hidden">

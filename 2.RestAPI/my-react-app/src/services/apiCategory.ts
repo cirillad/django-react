@@ -5,6 +5,14 @@ export const apiCategory = createApi({
    reducerPath: 'api',
    baseQuery: fetchBaseQuery({
       baseUrl: 'http://127.0.0.1:4096/api/',
+      prepareHeaders: (headers, { getState }) => {
+         // Витягуємо токен зі стану Redux
+         const token = (getState() as any).auth.token;
+         if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+         }
+         return headers;
+      },
    }),
    tagTypes: ['Categories'],
    endpoints: (builder) => ({
