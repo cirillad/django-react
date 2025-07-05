@@ -20,7 +20,7 @@ const navigation = [
     { name: 'Reports', href: '#', current: false },
 ]
 const userNavigation = [
-    { name: 'Your Profile', href: '#' },
+    { name: 'Your Profile', href: '/profile' },
     { name: 'Settings', href: '#' },
 ]
 
@@ -36,6 +36,13 @@ const Layout: React.FC = () => {
     const handleLogout = () => {
         dispatch(logout());
     };
+
+    // Формуємо URL аватарки:
+    const avatarUrl = authUser?.image
+        ? `${BASE_URL}${authUser.image}`   // локальний бекенд
+        : authUser?.google_picture_url
+            ? authUser.google_picture_url    // Google
+            : 'https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500';
 
     return (
         <>
@@ -97,17 +104,10 @@ const Layout: React.FC = () => {
                                                     <span className="absolute -inset-1.5" />
                                                     <span className="sr-only">Open user menu</span>
                                                     <img
-                                                        src={
-                                                            authUser?.google_picture_url
-                                                                ? authUser.google_picture_url.startsWith('http')
-                                                                    ? authUser.google_picture_url
-                                                                    : `${BASE_URL}${authUser.google_picture_url}`
-                                                                : 'https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500'
-                                                        }
                                                         alt="User avatar"
-                                                        className="h-8 w-8 rounded-full object-cover"
+                                                        className="size-10 rounded-full object-cover"
+                                                        src={avatarUrl}
                                                     />
-
                                                 </MenuButton>
                                             </div>
 
@@ -201,8 +201,8 @@ const Layout: React.FC = () => {
                                     <img alt="" src={user.imageUrl} className="size-10 rounded-full" />
                                 </div>
                                 <div className="ml-3">
-                                    <div className="text-base/5 font-medium text-white">{user.name}</div>
-                                    <div className="text-sm font-medium text-gray-400">{user.email}</div>
+                                    <div className="text-base/5 font-medium text-white">{authUser?.name}</div>
+                                    <div className="text-sm font-medium text-gray-400">{authUser?.email}</div>
                                 </div>
                                 <button
                                     type="button"

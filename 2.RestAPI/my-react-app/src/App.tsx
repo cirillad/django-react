@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage/LoginPage.tsx";
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './store';
 import { setCredentials, logout } from './store/authSlice';
+import ProfilePage from "./pages/ProfilePage/ProfilePage.tsx";
 
 const App: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -53,6 +54,7 @@ const App: React.FC = () => {
                 <Route path="edit-category/:id" element={<EditCategoryPage />} />
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
             </Route>
         </Routes>
     );

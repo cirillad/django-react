@@ -11,13 +11,14 @@ const LoginPage = () => {
     const navigate = useNavigate();
 
     const [login, { isLoading }] = useLoginMutation();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const tokens = await login({ username, password }).unwrap();
+            // Тут передаємо email, а не username
+            const tokens = await login({ email, password }).unwrap();
 
             const response = await fetch('http://127.0.0.1:4096/api/user/', {
                 headers: {
@@ -51,16 +52,13 @@ const LoginPage = () => {
             const res = await fetch('http://127.0.0.1:4096/api/google-idtoken-login/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ access_token: credentialResponse.credential }), // передаємо ID Token
+                body: JSON.stringify({ access_token: credentialResponse.credential }),
             });
 
             if (!res.ok) throw new Error('Google login failed');
 
             const data = await res.json();
 
-            // Якщо у відповіді від бекенда є токен (наприклад, JWT), підставляй його сюди,
-            // інакше просто передай user (потрібно адаптувати бекенд для JWT)
-            // Тут припустимо, що бекенд повертає JWT у data.access
             const userRes = await fetch('http://127.0.0.1:4096/api/user/', {
                 headers: { Authorization: `Bearer ${data.access}` },
             });
@@ -77,27 +75,60 @@ const LoginPage = () => {
         }
     };
 
-
     return (
-        <div style={{ maxWidth: 400, margin: '50px auto', padding: 20, border: '1px solid #ddd', borderRadius: 8 }}>
-            <form onSubmit={handleSubmit}>
-                <h2>Вхід</h2>
+        <div
+            style={{
+                maxWidth: 400,
+                margin: '50px auto',
+                padding: 20,
+                border: '1px solid #ddd',
+                borderRadius: 8,
+                fontFamily: 'Arial, sans-serif',
+            }}
+        >
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+                <h2 style={{ textAlign: 'center' }}>Вхід</h2>
+
                 <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    style={{ display: 'block', width: '100%', marginBottom: 10, padding: 8 }}
+                    type="email"  // змінили з text на email
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    style={{
+                        padding: 10,
+                        fontSize: 16,
+                        borderRadius: 4,
+                        border: '1px solid #ccc',
+                    }}
                 />
                 <input
                     type="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    style={{ display: 'block', width: '100%', marginBottom: 10, padding: 8 }}
+                    required
+                    style={{
+                        padding: 10,
+                        fontSize: 16,
+                        borderRadius: 4,
+                        border: '1px solid #ccc',
+                    }}
                 />
-                <button type="submit" disabled={isLoading} style={{ width: '100%', padding: 10 }}>
-                    Увійти
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                        padding: 12,
+                        fontSize: 16,
+                        backgroundColor: '#4f46e5',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 4,
+                        cursor: isLoading ? 'not-allowed' : 'pointer',
+                    }}
+                >
+                    {isLoading ? 'Завантаження...' : 'Увійти'}
                 </button>
             </form>
 
