@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import os
+
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,23 +38,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-
     'rest_framework',
-    'rest_framework.authtoken',
-
-    'corsheaders',
-
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
-
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
-
     'product',
+    'corsheaders',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,7 +56,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'allauth.account.middleware.AccountMiddleware',  # ⬅️ Обов'язково!
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -76,7 +69,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',  # важливо для allauth
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -134,67 +127,27 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Media files
+MEDIA_URL = 'media/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Для розробки. У продакшені налаштуй правильно!
+CORS_ALLOW_ALL_ORIGINS = True  # Only for development! Configure properly for production
 CORS_ALLOW_CREDENTIALS = True
 
+AUTH_USER_MODEL = 'product.CustomUser'
 
-# REST Framework
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.TokenAuthentication',  # для dj-rest-auth
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
-
-
-# Кастомна модель користувача
-
-AUTH_USER_MODEL = 'product.User'
-
-
-# django-allauth & dj-rest-auth налаштування
-
-SITE_ID = 1
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',  # для адмінки
-    'allauth.account.auth_backends.AuthenticationBackend',  # для allauth
-)
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'optional'  # або 'mandatory' за потреби
-
-REST_USE_JWT = True  # Використовувати JWT у dj-rest-auth
-
-
-# Налаштування для соціальних акаунтів (Google OAuth)
-
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET'),
-            'key': ''
-        }
-    }
-}
+EMAIL_HOST = 'smtp.ukr.net'                    # Адреса SMTP сервера
+EMAIL_PORT = 2525                              # Порт
+EMAIL_USE_TLS = False                           # Вказати True, якщо сервер підтримує TLS
+EMAIL_USE_SSL = True                          # Якщо сервер вимагає SSL — використай True замість TLS
+EMAIL_HOST_USER = 'super.novakvova@ukr.net'    # Логін
+EMAIL_HOST_PASSWORD = '2ap5JjwsslmASkUG'       # Пароль
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER           # Від кого відправляти
