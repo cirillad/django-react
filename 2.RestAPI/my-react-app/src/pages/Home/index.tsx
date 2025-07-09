@@ -10,6 +10,10 @@ const HomePage : React.FC = () => {
 
     const [deleteCategory] = useDeleteCategoryMutation();
 
+    const handleCategoryClick = (id: number) => {
+        navigate(`/category/${id}`);
+    };
+
     const handleDelete = async (id: number) => {
         const confirmDelete = window.confirm(
             "Ви дійсно хочете видалити цю категорію?"
@@ -48,7 +52,8 @@ const HomePage : React.FC = () => {
                     {list?.map((item) => (
                         <div
                             key={item.id}
-                            className="bg-white rounded-2xl shadow-md border border-gray-200 p-5 flex flex-col justify-between"
+                            onClick={() => handleCategoryClick(item.id)}
+                            className="bg-white rounded-2xl shadow-md border border-gray-200 p-5 flex flex-col justify-between cursor-pointer hover:shadow-lg transition"
                         >
                             <div>
                                 {item.image && (

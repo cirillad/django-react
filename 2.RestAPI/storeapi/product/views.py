@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from rest_framework.viewsets import ModelViewSet
-from .models import Category
-from .serializers import CategorySerializer, RegisterSerializer, ProfileUpdateSerializer
+from .models import Category, Product, ProductImage
+from .serializers import CategorySerializer, RegisterSerializer, ProfileUpdateSerializer, ProductSerializer, \
+    ProductImageSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .tokens import CustomTokenObtainPairSerializer
 import requests
@@ -14,7 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.tokens import default_token_generator as token_generator
 
 
@@ -26,9 +27,28 @@ GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 # Create your views here.
 class CategoryViewSet(ModelViewSet):
-    print("get data")
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer 
+    serializer_class = CategorySerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    parser_classes = [MultiPartParser, FormParser]   # <--- додай це
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        category_id = self.request.query_params.get('category')
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        return queryset
+
+class ProductImageViewSet(viewsets.ModelViewSet):
+    queryset = ProductImage.objects.all()
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]

@@ -1,13 +1,60 @@
+import os
+
 from rest_framework import serializers
-from .models import Category, CustomUser
+from .models import Category, CustomUser, ProductImage, Product
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import password_validation
+import requests
+from django.core.files.base import ContentFile
+from urllib.parse import urlparse
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
+    image = serializers.ImageField(write_only=True, required=True)  # для завантаження файлу
+
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'image_url']
+        read_only_fields = ['id']
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    images = serializers.ListField(
+        child=serializers.ImageField(), write_only=True, required=False
+    )
+    images_data = ProductImageSerializer(source='images', many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'category', 'name', 'description', 'price',
+            'images', 'images_data', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        images_data = validated_data.pop('images', [])
+        product = Product.objects.create(**validated_data)
+
+        for image in images_data:
+            ProductImage.objects.create(product=product, image=image)
+
+        return product
+
 
 class CategorySerializer(serializers.ModelSerializer):
+    products = ProductSerializer(many=True, read_only=True)
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'created_at', 'updated_at','image']
+        fields = ['id', 'name', 'slug', 'description', 'image', 'created_at', 'updated_at', 'products']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
 class RegisterSerializer(serializers.ModelSerializer):

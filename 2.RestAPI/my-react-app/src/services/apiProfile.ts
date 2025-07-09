@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { createBaseQuery } from "../utils/createBaseQuery.ts"; // твоя базова функція запиту
+import {baseQueryWithReauth} from "./baseQuery.ts"; // твоя базова функція запиту
 
 interface IUserProfile {
     username: string;
@@ -18,7 +18,7 @@ interface IUpdateProfileRequest {
 
 export const apiProfile = createApi({
     reducerPath: "apiProfile",
-    baseQuery: createBaseQuery("profile"),  // базовий URL /api/profile/
+    baseQuery: baseQueryWithReauth,  // базовий URL /api/profile/
     tagTypes: ["Profile"],
     endpoints: (builder) => ({
         getProfile: builder.query<IUserProfile, void>({

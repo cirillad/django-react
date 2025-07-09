@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from product.views import CategoryViewSet, ProfileUpdateView, ProfileView
+from product.views import CategoryViewSet, ProfileUpdateView, ProfileView, ProductViewSet, ProductImageViewSet
 from product.views import RegisterView, LoginView, GoogleLoginView
 from product.views import PasswordResetRequestView, PasswordResetConfirmView
 
@@ -27,6 +27,8 @@ from django.conf.urls.static import static
 
 router = DefaultRouter()
 router.register('categories', CategoryViewSet, basename='category')
+router.register('products', ProductViewSet, basename='product')
+router.register('product-images', ProductImageViewSet, basename='productimage')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

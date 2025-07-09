@@ -1,7 +1,6 @@
 import {createApi} from "@reduxjs/toolkit/query/react";
-import type {ICategoryCreate, ICategoryItem} from "./types";
+import type {ICategoryItem} from "./types";
 import {createBaseQuery} from "../utils/createBaseQuery.ts";
-import {serialize} from "object-to-formdata";
 
 export const apiCategory = createApi({
    reducerPath: 'api',
@@ -13,20 +12,12 @@ export const apiCategory = createApi({
          providesTags: ['Categories'],
       }),
 
-      createCategory: builder.mutation<ICategoryItem, ICategoryCreate>({
-         query: (newCategory) => {
-            try {
-               const formData = serialize(newCategory);
-               return {
-                  url: "/",
-                  method: "POST",
-                  body: formData,
-               }
-            }
-            catch {
-               throw new Error('Error create category');
-            }
-         },
+      createCategory: builder.mutation<ICategoryItem, FormData>({
+         query: (formData) => ({
+            url: "/",
+            method: "POST",
+            body: formData,
+         }),
          invalidatesTags: ["Categories"],
       }),
 

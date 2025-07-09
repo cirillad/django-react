@@ -30,6 +30,8 @@
     "react-helmet-async": "^2.0.5",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.2",
+    "react-sortablejs": "^6.1.4",
+    "sortablejs": "^1.15.6",
     "swiper": "^11.2.8",
     "tailwindcss": "^4.1.10",
     "vite-plugin-svgr": "^4.3.0"

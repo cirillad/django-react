@@ -24,17 +24,15 @@ const initialState: AuthState = {
   user: userFromStorage ? JSON.parse(userFromStorage) : null,
 };
 
-export const getProfile = createAsyncThunk(
+export const getProfile = createAsyncThunk<User, void, { state: { auth: AuthState } }>(
     "auth/getProfile",
     async (_, thunkAPI) => {
       try {
-        const token = (thunkAPI.getState() as { auth: AuthState }).auth.token;
+        const token = thunkAPI.getState().auth.token;
         const response = await axios.get(`${APP_ENV.API_BASE_URL}/api/profile/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        return response.data;
+        return response.data as User; // явно типізуємо
       } catch (error) {
         const err = error as AxiosError;
 
@@ -46,6 +44,7 @@ export const getProfile = createAsyncThunk(
       }
     }
 );
+
 
 const authSlice = createSlice({
   name: "auth",
