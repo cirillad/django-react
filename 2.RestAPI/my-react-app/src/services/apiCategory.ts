@@ -1,62 +1,56 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { ICategoryItem } from './types';
+import {createApi} from "@reduxjs/toolkit/query/react";
+import type {ICategoryItem} from "./types";
+import {createBaseQuery} from "../utils/createBaseQuery.ts";
 
 export const apiCategory = createApi({
    reducerPath: 'api',
-   baseQuery: fetchBaseQuery({
-      baseUrl: 'http://127.0.0.1:4096/api/',
-      prepareHeaders: (headers, { getState }) => {
-         // Витягуємо токен зі стану Redux
-         const token = (getState() as any).auth.token;
-         if (token) {
-            headers.set('Authorization', `Bearer ${token}`);
-         }
-         return headers;
-      },
-   }),
-   tagTypes: ['Categories'],
+   baseQuery: createBaseQuery("categories"),
+   tagTypes: ["Categories"],
    endpoints: (builder) => ({
-      getCategories: builder.query<ICategoryItem[], void>({
-         query: () => 'categories/',
+      getCategories:  builder.query<ICategoryItem[], void>({
+         query: () => '',
          providesTags: ['Categories'],
       }),
-      getCategory: builder.query<ICategoryItem, number>({
-         query: (id) => `categories/${id}/`,
-         providesTags: ['Categories'],
-      }),
-      deleteCategory: builder.mutation<void, number>({
-         query: (id) => ({
-            url: `categories/${id}/`,
-            method: 'DELETE',
-         }),
-         invalidatesTags: ['Categories'],
-      }),
+
       createCategory: builder.mutation<ICategoryItem, FormData>({
          query: (formData) => ({
-            url: 'categories/',
-            method: 'POST',
+            url: "/",
+            method: "POST",
             body: formData,
          }),
-         invalidatesTags: ['Categories'],
+         invalidatesTags: ["Categories"],
       }),
-      updateCategory: builder.mutation<
-          ICategoryItem,
-          { id: number; formData: FormData }
-      >({
+
+      deleteCategory: builder.mutation<void, number>({
+         query: (id) => ({
+            url: `${id}/`,
+            method: "DELETE",
+         }),
+         invalidatesTags: ["Categories"],
+      }),
+
+      getCategory: builder.query<ICategoryItem, number>({
+         query: (id) => `/${id}/`,
+         providesTags: ["Categories"],
+      }),
+      updateCategory: builder.mutation<ICategoryItem, { id: number; formData: FormData }>({
          query: ({ id, formData }) => ({
-            url: `categories/${id}/`,
-            method: 'PUT',
+            url: `/${id}/`,
+            method: "PUT",
             body: formData,
          }),
-         invalidatesTags: ['Categories'],
+         invalidatesTags: ["Categories"],
       }),
-   }),
+
+   })
+
 });
+
 
 export const {
    useGetCategoriesQuery,
-   useGetCategoryQuery,
    useDeleteCategoryMutation,
-   useCreateCategoryMutation,
+    useCreateCategoryMutation,
+   useGetCategoryQuery,
    useUpdateCategoryMutation,
 } = apiCategory;
