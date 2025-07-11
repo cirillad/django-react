@@ -1,53 +1,62 @@
-// src/App.tsx
 import './App.css';
-import React from "react";
-
-import { Route, Routes } from "react-router-dom";
-
-import Layout from "./components/Layout";
-import AdminLayout from "./layout/admin/AdminLayout.tsx";
-
-import HomePage from "./pages/Home";
-import Profile from "./pages/ProfilePage";
-import AddCategoryPage from "./pages/AddCategoryPage";
-import EditCategoryPage from "./pages/EditCategoryPage";
-import LoginPage from "./pages/Login";
-import RegisterPage from "./pages/Register";
-import PasswordResetRequest from "./pages/PasswordReset";
-import PasswordResetConfirm from "./pages/PasswordResetConfirm";
-import CategoryProductsPage from "./pages/CategoryProductsPage/CategoryProductsPage.tsx";
-
-import AdminDashboardPage from "./pages/admin/Dashboard";
-import AdminNotFoundPage from "./pages/admin/NotFound";
-import AddProductPage from "./pages/AddProductPage/AddProductPage.tsx";
+import HomePage from './pages/Home';
+import AddCategoryPage from './pages/AddCategoryPage/AddCategoryPage.tsx';
+import EditCategoryPage from './pages/EditCategoryPage/EditCategoryPage.tsx';
+import { Route, Routes } from 'react-router-dom';
+import Layout from './components/Layout';
+import * as React from 'react';
+import { RegisterPage } from "./pages/RegisterPage/RegisterPage.tsx";
+import LoginPage from "./pages/LoginPage/LoginPage.tsx";
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from './store';
+import { setCredentials, logout } from './store/authSlice';
+import ProfilePage from "./pages/ProfilePage/ProfilePage.tsx";
 
 const App: React.FC = () => {
+    const dispatch = useAppDispatch();
+    const token = useAppSelector((state) => state.auth.token);
+
+    useEffect(() => {
+        const BACKEND_URL = 'http://127.0.0.1:4096';
+
+        if (token) {
+            fetch(`${BACKEND_URL}/api/user/`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => {
+                    console.log('Response status:', res.status);
+                    return res.text();
+                })
+                .then(text => {
+                    console.log('Response text:', text);
+                    try {
+                        const userData = JSON.parse(text);
+                        console.log("🤚userData parsed:", userData);
+                        dispatch(setCredentials({ user: userData, token }));
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                    }
+                })
+                .catch(err => {
+                    console.error('Fetch error:', err);
+                });
+        } else {
+            dispatch(logout());
+        }
+    }, [token, dispatch]);
+
+
     return (
-        <>
-            <Routes>
-                <Route path="/" element={<Layout />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="profile" element={<Profile />} />
-                    <Route path="add-category" element={<AddCategoryPage />} />
-                    <Route path="add-product" element={<AddProductPage />} /> {/* <-- додано */}
-                    <Route path="edit-category/:id" element={<EditCategoryPage />} />
-                    <Route path="login" element={<LoginPage />} />
-                    <Route path="register" element={<RegisterPage />} />
-                    <Route path="password-reset" element={<PasswordResetRequest />} />
-                    <Route
-                        path="password-reset-confirm/:uid/:token"
-                        element={<PasswordResetConfirm />}
-                    />
-                    <Route path="category/:id" element={<CategoryProductsPage />} />
-                </Route>
-
-                <Route path="admin" element={<AdminLayout />}>
-                    <Route path="home" element={<AdminDashboardPage />} />
-                </Route>
-
-                <Route path="*" element={<AdminNotFoundPage />} />
-            </Routes>
-        </>
+        <Routes>
+            <Route path="/" element={<Layout />}>
+                <Route index element={<HomePage />} />
+                <Route path="add-category" element={<AddCategoryPage />} />
+                <Route path="edit-category/:id" element={<EditCategoryPage />} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+        </Routes>
     );
 };
 

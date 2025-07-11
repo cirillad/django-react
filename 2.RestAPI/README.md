@@ -45,29 +45,3 @@ npm i @reduxjs/toolkit react-redux
 ```
 pip install django-cors-headers
 ```
-
-
-## Django working images
-```
-pip install Pillow
-python manage.py makemigrations
-
-python manage.py migrate
-
-py manage.py runserver 4096
-```
-
-## Install jwt
-```
-pip install djangorestframework-simplejwt
-```
-
-## Google auth - щоб послати запит на гугл і отримати інформацію про користувача
-```
-pip install requests
-cd storeapi
-
-python manage.py makemigrations
-python manage.py migrate
-py manage.py runserver 4096
-```

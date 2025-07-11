@@ -1,33 +1,22 @@
-// src/app/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import { apiCategory } from "../services/apiCategory";
-import { authApi } from "../services/authApi";
-import { apiProfile } from "../services/apiProfile";
-import { apiProduct } from "../services/apiProduct";  // <-- додали apiProduct
-import authReducer from "../slices/authSlice";
-import { useDispatch, useSelector } from "react-redux";
-import type { TypedUseSelectorHook } from "react-redux";
+import { apiAuth } from "../services/apiAuth";
+import authReducer from "./authSlice";
+
+import { useDispatch, type TypedUseSelectorHook, useSelector } from "react-redux";
 
 export const store = configureStore({
     reducer: {
-        [apiCategory.reducerPath]: apiCategory.reducer,
-        [authApi.reducerPath]: authApi.reducer,
-        [apiProfile.reducerPath]: apiProfile.reducer,
-        [apiProduct.reducerPath]: apiProduct.reducer,    // <-- додали reducer apiProduct
         auth: authReducer,
+        [apiCategory.reducerPath]: apiCategory.reducer,
+        [apiAuth.reducerPath]: apiAuth.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(
-            apiCategory.middleware,
-            authApi.middleware,
-            apiProfile.middleware,
-            apiProduct.middleware   // <-- додали middleware apiProduct
-        ),
+        getDefaultMiddleware().concat(apiCategory.middleware, apiAuth.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-// Типізовані хуки для використання у компонентах
-export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
